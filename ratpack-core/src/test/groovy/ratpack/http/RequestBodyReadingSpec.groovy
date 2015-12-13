@@ -133,6 +133,26 @@ class RequestBodyReadingSpec extends RatpackGroovyDslSpec {
 
   def "can get large request body as bytes"() {
     given:
+    def string = "a" * 1024 * 9
+
+    when:
+    handlers {
+      post {
+        request.body.then { body ->
+          response.send new String(body.bytes, "utf8")
+        }
+      }
+    }
+
+    then:
+    requestSpec { requestSpec ->
+      requestSpec.body.stream({ it << string.getBytes("utf8") })
+      postText() == string
+    }
+  }
+
+  def "can read request body streamed with Expect 100-continue"() {
+    given:
     def postBody = "body"
     when:
     handlers {
@@ -147,6 +167,31 @@ class RequestBodyReadingSpec extends RatpackGroovyDslSpec {
     requestSpec { requestSpec ->
       requestSpec.headers.add('Expect', '100-continue')
       requestSpec.body.stream({ it << postBody.getBytes("utf8") })
+    }
+
+    then:
+    post()
+    response.headers
+    response.status.code == 200
+    response.body.text == postBody
+  }
+
+  def "can read request body with Expect 100-continue"() {
+    given:
+    def postBody = "body"
+    when:
+    handlers {
+      post {
+        request.body.then { body ->
+          response.send new String(body.bytes, "utf8")
+        }
+      }
+    }
+
+    and:
+    requestSpec { requestSpec ->
+      requestSpec.headers.add('Expect', '100-continue')
+      requestSpec.body.text(postBody)
     }
 
     then:

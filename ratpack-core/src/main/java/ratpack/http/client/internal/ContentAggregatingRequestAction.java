@@ -45,7 +45,9 @@ class ContentAggregatingRequestAction extends RequestActionSupport<ReceivedRespo
     p.addLast("httpResponseHandler", new SimpleChannelInboundHandler<FullHttpResponse>(false) {
       @Override
       public void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
-        success(fulfiller, toReceivedResponse(msg));
+        if (msg.status().code() != 100) {
+          success(fulfiller, toReceivedResponse(msg));
+        }
       }
 
       @Override

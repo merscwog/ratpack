@@ -75,7 +75,9 @@ class ContentStreamingRequestAction extends RequestActionSupport<StreamedRespons
         final Headers headers = new NettyHeadersBackedHeaders(msg.headers());
         final Status status = new DefaultStatus(msg.status());
 
-        success(downstream, new DefaultStreamedResponse(p, status, headers));
+        if (status.getCode() != 100) {
+          success(downstream, new DefaultStreamedResponse(p, status, headers));
+        }
       }
 
       @Override

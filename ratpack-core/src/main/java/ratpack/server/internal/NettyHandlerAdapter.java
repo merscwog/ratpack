@@ -111,7 +111,6 @@ public class NettyHandlerAdapter extends ChannelInboundHandlerAdapter {
       };
       ctx.writeAndFlush(continueResponse).addListener(listener);
       ctx.read();
-      return;
     }
 
     RequestBody requestBody = canHaveBody(nettyRequest.method()) ? new RequestBody(HttpUtil.getContentLength(nettyRequest, -1), ctx) : null;
